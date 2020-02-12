@@ -148,14 +148,8 @@ func getTabSpace(deep int) string {
 		return ""
 	}
 
-	format := fmt.Sprintf("%%%ds", deep-1)
-	leftPad := ""
-	if deep > 2 {
-		leftPad = fmt.Sprintf(format, "|")
-	}
-
-	format = fmt.Sprintf("%%s%%%ds", deep*2)
-	return fmt.Sprintf(format, leftPad, "|_ ")
+	format := fmt.Sprintf("%%%ds", deep*2)
+	return fmt.Sprintf(format, "|_ ")
 }
 
 func getType(value interface{}) jsonVarType {
