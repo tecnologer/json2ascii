@@ -4,7 +4,7 @@ Is a tool for convert json to ascii automatic
 
 ## Requirements
 
-### With Go 1.12.x or leater just init modules
+### With Go 1.12.x or later just init modules
 
     go mod init
 
