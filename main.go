@@ -61,7 +61,7 @@ func main() {
 	rootType := getType(json)
 	if rootType == object {
 		output = "Root: (object)\n"
-		output += parse(json.(map[string]interface{}), 1)
+		output += parseObject(json.(map[string]interface{}), 1)
 	} else if rootType == array {
 		output = "Root: (array)\n"
 		output += parseArray(json.([]interface{}), 1)
@@ -71,14 +71,14 @@ func main() {
 	fmt.Println(output)
 }
 
-func parse(json map[string]interface{}, deep int) string {
+func parseObject(json map[string]interface{}, deep int) string {
 	output := ""
 	for key, value := range json {
 		typeStr := getType(value)
 
 		output += fmt.Sprintf("%s%s: (%s)\n", getTabSpace(deep), key, typeStr)
 		if typeStr == object {
-			output += parse(value.(map[string]interface{}), deep+1)
+			output += parseObject(value.(map[string]interface{}), deep+1)
 		} else if typeStr == array {
 			output += parseArray(value.([]interface{}), deep+1)
 		}
@@ -92,14 +92,19 @@ func parseArray(json []interface{}, deep int) string {
 	for _, value := range json {
 		typeStr := getType(value)
 
+		output += fmt.Sprintf("%s%s: (%s)\n", getTabSpace(deep+1), "Child", typeStr)
 		if typeStr == object {
-			output += parse(value.(map[string]interface{}), deep+1)
+			output += parseObject(value.(map[string]interface{}), deep+2)
 		} else if typeStr == array {
-			output += parseArray(value.([]interface{}), deep+1)
+			output += parseArray(value.([]interface{}), deep+2)
 		}
 	}
 
 	return output
+}
+
+func isDuplicated(key string, _type jsonVarType, deep int) {
+
 }
 
 func getJSONParsed() (interface{}, error) {
@@ -143,8 +148,14 @@ func getTabSpace(deep int) string {
 		return ""
 	}
 
-	format := fmt.Sprintf("%%%ds", deep*2)
-	return fmt.Sprintf(format, "|_ ")
+	format := fmt.Sprintf("%%%ds", deep-1)
+	leftPad := ""
+	if deep > 2 {
+		leftPad = fmt.Sprintf(format, "|")
+	}
+
+	format = fmt.Sprintf("%%s%%%ds", deep*2)
+	return fmt.Sprintf(format, leftPad, "|_ ")
 }
 
 func getType(value interface{}) jsonVarType {

@@ -10,7 +10,7 @@ Is a tool for convert json to ascii automatic
 go mod init
 ```
 
-### With Go 1.11.x or less:
+### With Go 1.11.x or less
 
 - Install [logrus][1]
 
