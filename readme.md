@@ -1,13 +1,40 @@
 # json2ascii
+
 Is a tool for convert json to ascii automatic
 
-# Requierements
-### Install github.com/sirupsen/logrus 
-```
->go get github.com/sirupsen/logrus
-```
-#  Basic Usage
+## Requierements
 
+### With Go 1.12.x or leater just init modules
+
+    go mod init
+
+### With Go 1.11.x or less:
+
+- Install [logrus][1]
+
+```bash
+go get github.com/sirupsen/logrus
 ```
->go run main.go -jfile jsonfile.json
+
+## Basic Usage
+
+```bash
+# from file
+go run main.go -jfile jsonfile.json
+
+# raw json
+go run main.go -json "{\"en\": \"hello world\", \"es\": \"hola mundo\", \"array\": [{\"a\": 1.0, \"b\": false}]}"
 ```
+
+### Sample output
+
+```txt
+Root: (object)
+|_en: (string)
+|_es: (string)
+|_array: (array)
+    |_a: (float)
+    |_b: (bool)
+```
+
+[1]: github.com/sirupsen/logrus
