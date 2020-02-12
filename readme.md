@@ -6,7 +6,9 @@ Is a tool for convert json to ascii automatic
 
 ### With Go 1.12.x or later just init modules
 
-    go mod init
+```bash
+go mod init
+```
 
 ### With Go 1.11.x or less:
 
@@ -36,5 +38,9 @@ Root: (object)
     |_a: (float)
     |_b: (bool)
 ```
+
+## TODO
+
+- [ ] Remove duplicates
 
 [1]: github.com/sirupsen/logrus
