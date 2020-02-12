@@ -2,7 +2,7 @@
 
 Is a tool for convert json to ascii automatic
 
-## Requierements
+## Requirements
 
 ### With Go 1.12.x or leater just init modules
 
