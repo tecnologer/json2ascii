@@ -10,6 +10,36 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type jsonVarType byte
+
+const (
+	numeric jsonVarType = iota
+	jstring
+	array
+	object
+	jbool
+	unknown
+)
+
+func (jt jsonVarType) String() string {
+	switch jt {
+	case numeric:
+		return "numeric"
+	case jstring:
+		return "string"
+	case array:
+		return "array"
+	case object:
+		return "object"
+	case jbool:
+		return "bool"
+	case unknown:
+		fallthrough
+	default:
+		return "unknown"
+	}
+}
+
 var jsonData = flag.String("json", "", "JSON content to parse")
 var jsonFile = flag.String("jfile", "", "File of JSON parse")
 
@@ -22,23 +52,21 @@ func main() {
 	// fmt.Println(os.Args)
 
 	json, err := getJSONParsed()
-	var jsonArray []interface{}
 	if err != nil {
-		jsonArray, err = getJSONArrayNParsed()
-		if err != nil {
-			logrus.WithError(err).Error("invalid JSON")
-			return
-		}
+		logrus.WithError(err).Error("invalid JSON")
+		return
 	}
 
 	output := ""
-	if json != nil && jsonArray == nil {
+	rootType := getType(json)
+	if rootType == object {
 		output = "Root: (object)\n"
-		output += parse(json, 1)
-	} else {
+		output += parse(json.(map[string]interface{}), 1)
+	} else if rootType == array {
 		output = "Root: (array)\n"
-		output += parseArray(jsonArray, 1)
-
+		output += parseArray(json.([]interface{}), 1)
+	} else {
+		output = fmt.Sprintf("Root: (%s)\n", rootType)
 	}
 	fmt.Println(output)
 }
@@ -49,9 +77,9 @@ func parse(json map[string]interface{}, deep int) string {
 		typeStr := getType(value)
 
 		output += fmt.Sprintf("%s%s: (%s)\n", getTabSpace(deep), key, typeStr)
-		if typeStr == "object" {
+		if typeStr == object {
 			output += parse(value.(map[string]interface{}), deep+1)
-		} else if typeStr == "array" {
+		} else if typeStr == array {
 			output += parseArray(value.([]interface{}), deep+1)
 		}
 	}
@@ -64,9 +92,9 @@ func parseArray(json []interface{}, deep int) string {
 	for _, value := range json {
 		typeStr := getType(value)
 
-		if typeStr == "object" {
+		if typeStr == object {
 			output += parse(value.(map[string]interface{}), deep+1)
-		} else if typeStr == "array" {
+		} else if typeStr == array {
 			output += parseArray(value.([]interface{}), deep+1)
 		}
 	}
@@ -74,27 +102,8 @@ func parseArray(json []interface{}, deep int) string {
 	return output
 }
 
-func getJSONParsed() (map[string]interface{}, error) {
-	var result map[string]interface{}
-
-	if *jsonData == "" && *jsonFile != "" {
-		content, err := readJSON(*jsonFile)
-		if err != nil {
-			return nil, err
-		}
-		*jsonData = content
-	}
-
-	err := json.Unmarshal([]byte(*jsonData), &result)
-	if err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
-func getJSONArrayNParsed() ([]interface{}, error) {
-	var result []interface{}
+func getJSONParsed() (interface{}, error) {
+	var result interface{}
 
 	if *jsonData == "" && *jsonFile != "" {
 		content, err := readJSON(*jsonFile)
@@ -134,52 +143,48 @@ func getTabSpace(deep int) string {
 		return ""
 	}
 
-	// leftpad := ""
-	// for i := 0; i < deep; i++ {
-	// 	leftpad += "   "
-	// }
 	format := fmt.Sprintf("%%%ds", deep*2)
-	return fmt.Sprintf(format, "|_")
+	return fmt.Sprintf(format, "|_ ")
 }
 
-func getType(value interface{}) string {
+func getType(value interface{}) jsonVarType {
 	switch value.(type) {
 	case int:
-		return "numeric"
+		return numeric
 	case int8:
-		return "numeric"
+		return numeric
 	case int16:
-		return "numeric"
+		return numeric
 	case int32:
-		return "numeric"
+		return numeric
 	case int64:
-		return "numeric"
+		return numeric
 	case byte:
-		return "numeric"
+		return numeric
 	case uint:
-		return "numeric"
+		return numeric
 	//case uint8: (byte)
 	case uint16:
-		return "numeric"
+		return numeric
 	case uint32:
-		return "numeric"
+		return numeric
 	case uint64:
-		return "numeric"
+		return numeric
 	case uintptr:
-		return "numeric"
+		return numeric
 	case float64:
-		return "float"
+		return numeric
 	case float32:
-		return "float"
+		return numeric
 	case string:
-		return "string"
+		return jstring
 	case []interface{}:
-		return "array"
+		return array
 	case map[string]interface{}:
-		return "object"
+		return object
 	case bool:
-		return "bool"
+		return jbool
 	default:
-		return "unknown"
+		return unknown
 	}
 }
